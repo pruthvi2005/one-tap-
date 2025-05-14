@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex flex-column min-vh-100">
+<div class="hero-section text-center py-5">
+    <h1 class="display-4">Your Trusted Home Services Partner</h1>
+    <p class="lead">Professional, Reliable, and Quality Service at Your Doorstep</p>
+    {% if not current_user.is_authenticated %}
+        <div class="mt-4">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg me-3">Get Started</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">Login</a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="services-section py-5">
+    <h2 class="text-center mb-5">Our Services</h2>
+    <div class="row g-4">
+        {% for service in services %}
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ service.name }}</h5>
+                    <p class="card-text">{{ service.description }}</p>
+                    <p class="text-muted">Starting from ${{ service.base_price }}</p>
+                    {% if current_user.is_authenticated and current_user.user_type == 'user' %}
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookingModal{{ service.id }}">
+                        Book Now
+                    </button>
+                    
+                    <!-- Booking Modal -->
+                    <div class="modal fade" id="bookingModal{{ service.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Book {{ service.name }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="{{ url_for('book_service') }}" method="POST">
+                                        <input type="hidden" name="service_id" value="{{ service.id }}">
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Select Provider</label>
+                                            <select name="provider_id" class="form-select" required>
+                                                <option value="">Choose a provider...</option>
+                                                {% for provider in providers if provider.service_type == service.name %}
+                                                <option value="{{ provider.id }}">{{ provider.user.name }} - ${{ provider.hourly_rate }}/hr</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">Select Date and Time</label>
+                                            <input type="datetime-local" name="booking_date" class="form-control" required>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary">Confirm Booking</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% elif not current_user.is_authenticated %}
+                    <a href="{{ url_for('login') }}" class="btn btn-primary">Login to Book</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="how-it-works py-5 bg-light">
+    <h2 class="text-center mb-5">How It Works</h2>
+    <div class="row text-center">
+        <div class="col-md-4">
+            <div class="step-icon mb-3">
+                <i class="fas fa-user-plus fa-3x text-primary"></i>
+            </div>
+            <h4>1. Sign Up</h4>
+            <p>Create your account in minutes</p>
+        </div>
+        <div class="col-md-4">
+            <div class="step-icon mb-3">
+                <i class="fas fa-calendar-check fa-3x text-primary"></i>
+            </div>
+            <h4>2. Book a Service</h4>
+            <p>Choose from our wide range of services</p>
+        </div>
+        <div class="col-md-4">
+            <div class="step-icon mb-3">
+                <i class="fas fa-home fa-3x text-primary"></i>
+            </div>
+            <h4>3. Get it Done</h4>
+            <p>Sit back while we take care of your home</p>
+        </div>
+    </div>
+</div>
+
+<div class="testimonials py-5">
+    <h2 class="text-center mb-5">What Our Customers Say</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="testimonial-card text-center p-4">
+                <div class="testimonial-image mb-3">
+                    <img src="https://www.stryx.com/cdn/shop/articles/man-looking-attractive.jpg?v=1666662774" alt="Customer 1" class="rounded-circle">
+                </div>
+                <p class="testimonial-text">"Excellent service! The team was professional and completed the job perfectly."</p>
+                <h5 class="testimonial-name">John Smith</h5>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="testimonial-card text-center p-4">
+                <div class="testimonial-image mb-3">
+                    <img src="https://www.sabc1.co.za/sabc1/wp-content/uploads/2022/09/GoodMen9276_1.jpg" alt="Customer 2" class="rounded-circle">
+                </div>
+                <p class="testimonial-text">"Very reliable and efficient. Would definitely recommend their services!"</p>
+                <h5 class="testimonial-name">Michael Brown</h5>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="testimonial-card text-center p-4">
+                <div class="testimonial-image mb-3">
+                    <img src="https://www.sheknows.com/wp-content/uploads/2018/08/smart-young-woman-feature.jpeg?w=1024" alt="Customer 3" class="rounded-circle">
+                </div>
+                <p class="testimonial-text">"Great experience from booking to completion. Very satisfied!"</p>
+                <h5 class="testimonial-name">Sarah Johnson </h5> </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

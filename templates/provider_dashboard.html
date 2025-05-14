@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex flex-column min-vh-100">
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Welcome, {{ current_user.name }}!</h5>
+                <p class="card-text">
+                    <i class="fas fa-envelope"></i> {{ current_user.email }}<br>
+                    <i class="fas fa-tools"></i> {{ provider.service_type.title() }} Service Provider<br>
+                    <i class="fas fa-star"></i> {{ provider.experience }} years experience<br>
+                    <i class="fas fa-dollar-sign"></i> ${{ provider.hourly_rate }}/hour
+                </p>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="availabilityToggle" 
+                           {% if provider.availability %}checked{% endif %}>
+                    <label class="form-check-label" for="availabilityToggle">Available for Work</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h3>{{ bookings|length }}</h3>
+                        <p>Total Bookings</p>
+                    </div>
+                    <div class="col-6">
+                        <h3>{{ bookings|selectattr('status', 'equalto', 'completed')|list|length }}</h3>
+                        <p>Completed Jobs</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Service Bookings</h5>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-primary active">All</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary">Pending</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary">Completed</button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if bookings %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Client</th>
+                                    <th>Service</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.user.name }}</td>
+                                    <td>{{ booking.service.name }}</td>
+                                    <td>{{ booking.booking_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if booking.status == 'completed' 
+                                            else 'warning' if booking.status == 'pending' 
+                                            else 'danger' if booking.status == 'cancelled' 
+                                            else 'info' }}">
+                                            {{ booking.status }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if booking.status == 'pending' %}
+                                            <button class="btn btn-sm btn-success">Accept</button>
+                                            <button class="btn btn-sm btn-danger">Decline</button>
+                                        {% elif booking.status == 'accepted' %}
+                                            <button class="btn btn-sm btn-primary">Complete</button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-center">No bookings yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Service Description</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ provider.description }}</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editDescriptionModal">
+                    Edit Description
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Edit Description Modal -->
+<div class="modal fade" id="editDescriptionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Service Description</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="serviceDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="serviceDescription" rows="5">{{ provider.description }}</textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

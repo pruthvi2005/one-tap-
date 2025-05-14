@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex flex-column min-vh-100">
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Welcome, {{ current_user.name }}!</h5>
+                <p class="card-text">
+                    <i class="fas fa-envelope"></i> {{ current_user.email }}<br>
+                    <i class="fas fa-calendar-alt"></i> Member since: {{ current_user.created_at.strftime('%B %d, %Y') }}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">My Bookings</h5>
+            </div>
+            <div class="card-body">
+                {% if bookings %}
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>Provider</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings %}
+                                <tr>
+                                    <td>{{ booking.service.name }}</td>
+                                    <td>{{ booking.provider.user.name }}</td>
+                                    <td>{{ booking.booking_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if booking.status == 'completed' 
+                                            else 'warning' if booking.status == 'pending' 
+                                            else 'danger' if booking.status == 'cancelled' 
+                                            else 'info' }}">
+                                            {{ booking.status }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-center">No bookings yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Available Services</h5>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-primary active">All Services</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary">Popular</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary">New</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    {% for service in services %}
+                    <div class="col-md-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ service.name }}</h5>
+                                <p class="card-text">{{ service.description }}</p>
+                                <p class="text-muted">Starting from ${{ service.base_price }}</p>
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bookingModal{{ service.id }}">
+                                    Book Now
+                                </button>
+
+                                <!-- Booking Modal -->
+                                <div class="modal fade" id="bookingModal{{ service.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Book {{ service.name }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="{{ url_for('book_service') }}" method="POST">
+                                                    <input type="hidden" name="service_id" value="{{ service.id }}">
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Select Provider</label>
+                                                        <select name="provider_id" class="form-select" required>
+                                                            <option value="">Choose a provider...</option>
+                                                            {% for provider in providers if provider.service_type == service.name %}
+                                                            <option value="{{ provider.id }}">{{ provider.user.name }} - ${{ provider.hourly_rate }}/hr</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Select Date and Time</label>
+                                                        <input type="datetime-local" name="booking_date" class="form-control" required>
+                                                    </div>
+                                                    
+                                                    <button type="submit" class="btn btn-primary">Confirm Booking</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

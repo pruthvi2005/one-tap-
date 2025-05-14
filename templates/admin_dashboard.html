@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex flex-column min-vh-100">
+<div class="row">
+    <div class="col-md-3">
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h5 class="card-title">Welcome Admin!</h5>
+                <p class="card-text">
+                    <i class="fas fa-envelope"></i> {{ current_user.email }}
+                </p>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Quick Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span><i class="fas fa-users"></i> Total Users</span>
+                    <span class="badge bg-primary">{{ users|length }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span><i class="fas fa-tools"></i> Service Providers</span>
+                    <span class="badge bg-success">{{ providers|length }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span><i class="fas fa-calendar-check"></i> Total Bookings</span>
+                    <span class="badge bg-info">{{ bookings|length }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" id="users-tab" data-bs-toggle="tab" href="#users" role="tab">Users</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="providers-tab" data-bs-toggle="tab" href="#providers" role="tab">Service Providers</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="services-tab" data-bs-toggle="tab" href="#services" role="tab">Services</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="bookings-tab" data-bs-toggle="tab" href="#bookings" role="tab">Bookings</a>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="adminTabContent">
+            <!-- Users Tab -->
+            <div class="tab-pane fade show active" id="users" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Registered Users</h5>
+                        <button class="btn btn-primary btn-sm">Add User</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                    <tr>
+                                        <td>{{ user.name }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>{{ user.user_type }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if user.is_active else 'danger' }}">
+                                                {{ 'Active' if user.is_active else 'Inactive' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                            <button class="btn btn-sm btn-{{ 'danger' if user.is_active else 'success' }}">
+                                                {{ 'Deactivate' if user.is_active else 'Activate' }}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Providers Tab -->
+            <div class="tab-pane fade" id="providers" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Service Providers</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Service Type</th>
+                                        <th>Experience</th>
+                                        <th>Rate</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for provider in providers %}
+                                    <tr>
+                                        <td>{{ provider.user.name }}</td>
+                                        <td>{{ provider.service_type }}</td>
+                                        <td>{{ provider.experience }} years</td>
+                                        <td>${{ provider.hourly_rate }}/hr</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if provider.availability else 'warning' }}">
+                                                {{ 'Available' if provider.availability else 'Unavailable' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">View Details</button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services Tab -->
+            <div class="tab-pane fade" id="services" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Available Services</h5>
+                        <button class="btn btn-primary btn-sm">Add Service</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Service Name</th>
+                                        <th>Category</th>
+                                        <th>Base Price</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for service in services %}
+                                    <tr>
+                                        <td>{{ service.name }}</td>
+                                        <td>{{ service.category }}</td>
+                                        <td>${{ service.base_price }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">Edit</button>
+                                            <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bookings Tab -->
+            <div class="tab-pane fade" id="bookings" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Service Bookings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Provider</th>
+                                        <th>Service</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for booking in bookings %}
+                                    <tr>
+                                        <td>{{ booking.user.name }}</td>
+                                        <td>{{ booking.provider.user.name }}</td>
+                                        <td>{{ booking.service.name }}</td>
+                                        <td>{{ booking.booking_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if booking.status == 'completed' 
+                                                else 'warning' if booking.status == 'pending' 
+                                                else 'danger' if booking.status == 'cancelled' 
+                                                else 'info' }}">
+                                                {{ booking.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary">View Details</button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
